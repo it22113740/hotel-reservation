@@ -1,4 +1,3 @@
-import { GalleryVerticalEnd } from "lucide-react"
 import Image from "next/image"
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="bg-muted relative hidden lg:block">
                 <Image
                     src="/images/login-banner.jpg"
-                    alt="Image"
+                    alt="Elegant hotel lobby with modern interior design and warm lighting"
                     className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
                     width={1000}
                     height={1000}
