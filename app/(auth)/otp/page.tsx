@@ -11,7 +11,6 @@ const OTPPage = () => {
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [error, setError] = useState('')
-  const [successfulCreation, setSuccessfulCreation] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
@@ -29,14 +28,16 @@ const OTPPage = () => {
 
       if (result.status === 'complete') {
         toast.success('Password reset successful')
-        await setActive({ session: result.createdSessionId })
-        router.push('/')
+        // Redirect to login page for user to login with new password there is no need to set active session here
+        router.push('/login')
       }
     } catch (err: any) {
-      toast.error(err.errors?.[0]?.message || 'Invalid code or password')
+      setError(err.errors?.[0]?.message || 'Invalid code or password')
+    } finally {
+      setCode('')
+      setNewPassword('')
     }
   }
-
   return (
     <form className="flex flex-col" onSubmit={handleSubmit}>
       <h1 className="text-2xl font-bold">Reset Password</h1>
