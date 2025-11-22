@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useSignIn } from '@clerk/nextjs'
+import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from "sonner"
@@ -10,8 +11,6 @@ import { toast } from "sonner"
 const ForgotPasswordPage = () => {
   const { isLoaded, signIn } = useSignIn()
   const [email, setEmail] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const [error, setError] = useState('')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,14 +21,21 @@ const ForgotPasswordPage = () => {
       await signIn.create({
         strategy: 'reset_password_email_code',
         identifier: email,
-      }).then(() => {
-        toast.success('Password reset code sent! Check your email.')
-        router.push(`/otp?email=${encodeURIComponent(email)}`)
       })
-    } catch (err: any) {
-      toast.error(err.errors?.[0]?.message || 'Failed to send reset email')
-    } finally {
+      
+      // Only clear email and redirect on success
       setEmail('')
+      toast.success('Password reset code sent! Check your email.')
+      setTimeout(() => {
+        router.push(`/otp?email=${encodeURIComponent(email)}`)
+      }, 1500)
+    } catch (err: unknown) {
+      // Use Clerk's type guard to safely extract error message
+      if (isClerkAPIResponseError(err)) {
+        toast.error(err.errors?.[0]?.message || 'Failed to send reset email')
+      } else {
+        toast.error('Failed to send reset email')
+      }
     }
   }
 
@@ -40,12 +46,6 @@ const ForgotPasswordPage = () => {
         Enter your email below to reset your password
       </p>
       <FieldGroup className="mt-6">
-        {successMessage && (
-          <div className="text-green-500 text-sm text-center">{successMessage}</div>
-        )}
-        {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
-        )}
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
