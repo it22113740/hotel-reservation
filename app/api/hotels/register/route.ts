@@ -149,6 +149,7 @@ export async function POST(request: NextRequest) {
             contactPhone: phone,
             images: imageUrls,
             ownerId: userId,
+            location: `${city}, ${country}`,
         });
 
         // 11. Return success response

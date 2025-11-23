@@ -72,7 +72,7 @@ const hotelSchema = new Schema<IHotel>({
     city: { type: String, required: true },
     country: { type: String, required: true },
     fullAddress: { type: String, required: true },
-    location: { type: String, required: false }, // Generated: "City, Country"
+    location: { type: String, required: true }, // Generated: "City, Country"
     images: { type: [String], required: true, validate: [arrayLimit, 'Max 10 images'] },
 
     // Owner Info (Required at registration)
