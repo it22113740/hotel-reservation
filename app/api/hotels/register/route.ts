@@ -11,6 +11,11 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Validate configuration
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error('Missing Cloudinary environment variables');
+}
+
 export async function POST(request: NextRequest) {
     try {
         // 1. Authenticate user
@@ -35,7 +40,7 @@ export async function POST(request: NextRequest) {
 
         // 4. Extract FormData
         const formData = await request.formData();
-        
+
         const hotelName = formData.get('hotelName') as string;
         const description = formData.get('description') as string;
         const city = formData.get('city') as string;
@@ -47,23 +52,23 @@ export async function POST(request: NextRequest) {
         const images = formData.getAll('images') as File[];
 
         // 5. Validate required fields
-        if (!hotelName || !description || !city || !country || !address || 
+        if (!hotelName || !description || !city || !country || !address ||
             !ownerName || !contactEmail || !phone) {
-            return NextResponse.json({ 
-                error: 'Missing required fields' 
+            return NextResponse.json({
+                error: 'Missing required fields'
             }, { status: 400 });
         }
 
         // 6. Validate images
         if (images.length === 0) {
-            return NextResponse.json({ 
-                error: 'At least one image is required' 
+            return NextResponse.json({
+                error: 'At least one image is required'
             }, { status: 400 });
         }
 
         if (images.length > 10) {
-            return NextResponse.json({ 
-                error: 'Maximum 10 images allowed' 
+            return NextResponse.json({
+                error: 'Maximum 10 images allowed'
             }, { status: 400 });
         }
 
@@ -75,8 +80,8 @@ export async function POST(request: NextRequest) {
         });
 
         if (invalidImages.length > 0) {
-            return NextResponse.json({ 
-                error: 'All images must be valid image files under 10MB' 
+            return NextResponse.json({
+                error: 'All images must be valid image files under 10MB'
             }, { status: 400 });
         }
 
@@ -99,14 +104,14 @@ export async function POST(request: NextRequest) {
         }));
         // console.log('Array of image URLs:',imageUrls);
         // 8. Check if hotel with same name already exists for this user
-        const existingHotel = await Hotel.findOne({ 
-            ownerId: userId, 
-            name: hotelName 
+        const existingHotel = await Hotel.findOne({
+            ownerId: userId,
+            name: hotelName
         });
 
         if (existingHotel) {
-            return NextResponse.json({ 
-                error: 'You already have a hotel with this name' 
+            return NextResponse.json({
+                error: 'You already have a hotel with this name'
             }, { status: 409 });
         }
 
@@ -115,8 +120,8 @@ export async function POST(request: NextRequest) {
         }
         const slug = generateSlug(hotelName);
         if (await Hotel.findOne({ slug: slug })) {
-            return NextResponse.json({ 
-                error: 'A hotel with this name already exists' 
+            return NextResponse.json({
+                error: 'A hotel with this name already exists'
             }, { status: 409 });
         }
 
@@ -136,7 +141,7 @@ export async function POST(request: NextRequest) {
         });
 
         // 11. Return success response
-        return NextResponse.json({ 
+        return NextResponse.json({
             success: true,
             message: 'Hotel registration submitted successfully! Pending admin approval.',
             hotel: {
@@ -149,8 +154,8 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Hotel registration error:', error);
-        return NextResponse.json({ 
-            error: 'Failed to register hotel. Please try again.' 
+        return NextResponse.json({
+            error: 'Failed to register hotel. Please try again.'
         }, { status: 500 });
     }
 }
