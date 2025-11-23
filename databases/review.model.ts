@@ -43,7 +43,7 @@ const reviewSchema = new Schema<IReview>({
     title: { type: String },
     comment: { type: String, required: true },
     images: { type: [String] },
-    helpful: { type: Number, required: true },
+    helpful: { type: Number, required: true ,default: 0},
     stayDate: { type: String },
     roomType: { type: String },
     tripType: { type: String },
