@@ -83,14 +83,23 @@ export default function RegisterPage() {
   const handleGoogleSignUp = async () => {
     if (!isLoaded) return
     
+    // Clear any stale error messages
+    setError('')
+    
     try {
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: '/',
       })
+      // If we reach here, redirect initiation succeeded
+      toast.success('Redirecting to Google...')
     } catch (err: unknown) {
-      toast.error('Failed to sign up with Google')
+      if (isClerkAPIResponseError(err)) {
+        setError(err.errors?.[0]?.message || 'Failed to sign up with Google')
+      } else {
+        setError('An error occurred while signing up with Google')
+      }
     }
   }
 
