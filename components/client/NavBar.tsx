@@ -18,7 +18,7 @@ export const LankaStayLogo = () => {
 
 const NavBar = () => {
     return (
-        <Navbar className="mt-5">
+        <Navbar className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm p-4">
             <NavbarBrand>
                 <Link href="/" className="flex items-center gap-2">
                     <LankaStayLogo />
