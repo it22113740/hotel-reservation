@@ -18,13 +18,12 @@ interface ReviewsSectionProps {
 }
 
 const ReviewsSection = ({ reviews, averageRating, totalReviews }: ReviewsSectionProps) => {
-  const ratingBreakdown = [
-    { stars: 5, count: 89, percentage: 75 },
-    { stars: 4, count: 15, percentage: 13 },
-    { stars: 3, count: 8, percentage: 7 },
-    { stars: 2, count: 4, percentage: 3 },
-    { stars: 1, count: 2, percentage: 2 },
-  ]
+  // Calculate rating breakdown from actual reviews
+  const ratingBreakdown = [5, 4, 3, 2, 1].map(stars => {
+    const count = reviews.filter(r => r.rating === stars).length
+    const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
+    return { stars, count, percentage }
+  })
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6">
@@ -45,11 +44,10 @@ const ReviewsSection = ({ reviews, averageRating, totalReviews }: ReviewsSection
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-5 h-5 ${
-                  i < Math.floor(averageRating)
+                className={`w-5 h-5 ${i < Math.floor(averageRating)
                     ? 'fill-yellow-400 text-yellow-400'
                     : 'text-gray-300'
-                }`}
+                  }`}
               />
             ))}
           </div>
@@ -100,11 +98,10 @@ const ReviewsSection = ({ reviews, averageRating, totalReviews }: ReviewsSection
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
-                          i < review.rating
+                        className={`w-4 h-4 ${i < review.rating
                             ? 'fill-yellow-400 text-yellow-400'
                             : 'text-gray-300'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
