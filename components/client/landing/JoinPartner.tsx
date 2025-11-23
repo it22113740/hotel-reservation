@@ -80,7 +80,7 @@ const JoinPartner = () => {
                   className="group"
                   asChild
                 >
-                  <Link href="/register?type=partner">
+                  <Link href="#">
                     Join as Partner
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
