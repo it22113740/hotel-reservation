@@ -6,7 +6,7 @@ import JoinPartner from "@/components/client/landing/JoinPartner"
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pt-16">
         {/* Hero Section - First thing users see */}
         <Hero />
         
