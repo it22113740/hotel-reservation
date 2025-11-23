@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server';
 // Define public routes (accessible to everyone)
 const isPublicRoute = createRouteMatcher([
   '/',
+  '/hotels(.*)',
+  '/hotel/(.*)',
+  '/partner-hotel(.*)',
   '/login(.*)',
   '/register(.*)',
   '/forgot-password(.*)',
