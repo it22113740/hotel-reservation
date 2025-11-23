@@ -16,12 +16,12 @@ interface PartnerFormData {
   address: string
   city: string
   country: string
-  
+
   // Owner Information
   ownerName: string
   contactEmail: string
   phone: string
-  
+
   // Images
   images: File[]
 }
@@ -55,27 +55,27 @@ const PartnerRegisterPage = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    
-    // Limit to 10 images
+
+    // Validate file count
     if (files.length > 10) {
       toast.error('Maximum 10 images allowed')
       return
     }
 
-    // Validate file sizes (max 10MB each)
-    const invalidFiles = files.filter(file => file.size > 10 * 1024 * 1024)
+    // Validate file size and type
+    const invalidFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/')
+      const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
+      return !isValidType || !isValidSize
+    })
+
     if (invalidFiles.length > 0) {
-      toast.error('Some files exceed 10MB limit')
+      toast.error('All files must be images under 10MB')
       return
     }
 
-    // Clean up old preview URLs
-    imagePreviews.forEach(url => URL.revokeObjectURL(url))
-
-    // Create new preview URLs
-    const newPreviews = files.map(file => URL.createObjectURL(file))
-    setImagePreviews(newPreviews)
     setFormData(prev => ({ ...prev, images: files }))
+    toast.success(`${files.length} image(s) selected`)
   }
 
   const removeImage = (index: number) => {
@@ -85,7 +85,7 @@ const PartnerRegisterPage = () => {
     // Remove from both arrays
     const newImages = formData.images.filter((_, i) => i !== index)
     const newPreviews = imagePreviews.filter((_, i) => i !== index)
-    
+
     setFormData(prev => ({ ...prev, images: newImages }))
     setImagePreviews(newPreviews)
   }
@@ -93,38 +93,6 @@ const PartnerRegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    try {
-      // Create FormData for file upload
-      const submitData = new FormData()
-      
-      // Append text fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key !== 'images') {
-          submitData.append(key, value as string)
-        }
-      })
-      
-      // Append images
-      formData.images.forEach((file) => {
-        submitData.append('images', file)
-      })
-
-      const response = await fetch('/api/partner/register', {
-        method: 'POST',
-        body: submitData,
-      })
-
-      if (!response.ok) throw new Error('Registration failed')
-
-      toast.success('Hotel registered successfully!')
-      router.push('/partner/success')
-      
-    } catch (error) {
-      toast.error('Failed to register hotel. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
   }
 
   return (
@@ -132,8 +100,8 @@ const PartnerRegisterPage = () => {
       {/* Gradient Background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-full h-full max-w-6xl mx-auto">
-          <div 
-            className="w-full h-full rounded-3xl opacity-20 blur-3xl filter" 
+          <div
+            className="w-full h-full rounded-3xl opacity-20 blur-3xl filter"
             style={{ background: 'linear-gradient(90deg, #44ff9a -0.55%, #44b0ff 22.86%, #8b44ff 48.36%, #ff6644 73.33%, #ebff70 99.34%)' }}
           />
         </div>
@@ -284,7 +252,7 @@ const PartnerRegisterPage = () => {
 
             <div>
               <Label htmlFor="images" className="mb-3 block">Upload Images (Max 10) *</Label>
-              
+
               {/* Upload Area - Show only if no images or less than 10 */}
               {formData.images.length < 10 && (
                 <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary transition-colors cursor-pointer mb-6">
@@ -329,7 +297,7 @@ const PartnerRegisterPage = () => {
                       <p className="text-xs text-gray-500">Maximum limit reached</p>
                     )}
                   </div>
-                  
+
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {imagePreviews.map((preview, index) => (
                       <div
@@ -342,7 +310,7 @@ const PartnerRegisterPage = () => {
                           fill
                           className="object-cover"
                         />
-                        
+
                         {/* Remove Button */}
                         <button
                           type="button"
