@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { MapPin, Star, Users, Wifi, Utensils, Car } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface HotelCardProps {
     id?: string;
@@ -33,9 +34,10 @@ const HotelCard = ({
         restaurant: <Utensils className="w-4 h-4" />,
         parking: <Car className="w-4 h-4" />
     };
+    const router = useRouter();
 
     return (
-        <Card className="w-full h-full border border-gray-200 shadow-sm rounded-xl hover:shadow-xl transition-all duration-300 hover:cursor-pointer hover:-translate-y-1 bg-white overflow-hidden group">
+        <Card className="w-full h-full border border-gray-200 shadow-sm rounded-xl hover:shadow-xl transition-all duration-300 hover:cursor-pointer hover:-translate-y-1 bg-white overflow-hidden group" onClick={() => router.push(`/hotels/${id}`)}>
             <CardHeader className="p-0 relative overflow-hidden">
                 <div className="relative w-full h-56">
                     <Image 
