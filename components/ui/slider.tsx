@@ -70,11 +70,11 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           style={{ zIndex: 4 }}
         />
         <div
-          className="absolute h-5 w-5 rounded-full border-2 border-primary bg-white shadow-md cursor-pointer"
+          className="absolute h-5 w-5 rounded-full border-2 border-primary bg-white shadow-md pointer-events-none"
           style={{ left: `calc(${getPercentage(localValue[0])}% - 10px)` }}
         />
         <div
-          className="absolute h-5 w-5 rounded-full border-2 border-primary bg-white shadow-md cursor-pointer"
+          className="absolute h-5 w-5 rounded-full border-2 border-primary bg-white shadow-md pointer-events-none"
           style={{ left: `calc(${getPercentage(localValue[1])}% - 10px)` }}
         />
       </div>
