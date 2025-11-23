@@ -32,16 +32,13 @@ export default function LoginPage() {
       const result = await signIn.create({
         identifier: email,
         password,
-      }).then(() => {
-        toast.success('Login successful')
-        router.push('/')
       })
 
-      // if (result.status === 'complete') {
-      //   await setActive({ session: result.createdSessionId })
-      //   toast.success('Login successful')
-      //   router.push(redirectUrl)
-      // }
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
+        toast.success('Login successful')
+        router.push(redirectUrl)
+      }
     } catch (error: unknown) {
       if (isClerkAPIResponseError(error)) {
         toast.error(error.errors?.[0]?.message || 'Invalid email or password')
@@ -102,8 +99,8 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)} 
           />
         </Field>
+        <div id="clerk-captcha"></div>
         <Field>
-          <div id="clerk-captcha"></div>
           <Button type="submit" disabled={!isLoaded}>Login</Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>

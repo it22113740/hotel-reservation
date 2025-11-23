@@ -57,6 +57,7 @@ const ForgotPasswordPage = () => {
             required
           />
         </Field>
+        <div id="clerk-captcha"></div>
         <Field>
           <Button type="submit" disabled={!isLoaded}>Reset Password</Button>
         </Field>

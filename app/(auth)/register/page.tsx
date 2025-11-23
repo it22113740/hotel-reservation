@@ -127,8 +127,8 @@ export default function RegisterPage() {
               required
             />
           </Field>
+          <div id="clerk-captcha"></div>
           <Field>
-            <div id="clerk-captcha"></div>
             <Button type="submit" disabled={!isLoaded}>Verify Email</Button>
           </Field>
         </FieldGroup>
@@ -193,8 +193,8 @@ export default function RegisterPage() {
             required
           />
         </Field>
+        <div id="clerk-captcha"></div>
         <Field>
-          <div id="clerk-captcha"></div>
           <Button type="submit" disabled={!isLoaded}>Register</Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
