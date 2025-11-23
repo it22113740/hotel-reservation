@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useSignIn } from '@clerk/nextjs'
+import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from "sonner"
@@ -19,6 +20,8 @@ const OTPPage = () => {
     e.preventDefault()
     if (!isLoaded) return
 
+    setError('')
+
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: 'reset_password_email_code',
@@ -28,14 +31,17 @@ const OTPPage = () => {
 
       if (result.status === 'complete') {
         toast.success('Password reset successful')
-        // Redirect to login page for user to login with new password there is no need to set active session here
+        setCode('')
+        setNewPassword('')
+        // Redirect to login page for user to login with new password
         router.push('/login')
       }
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || 'Invalid code or password')
-    } finally {
-      setCode('')
-      setNewPassword('')
+    } catch (err: unknown) {
+      if (isClerkAPIResponseError(err)) {
+        setError(err.errors?.[0]?.message || 'Invalid code or password')
+      } else {
+        setError('An error occurred during password reset')
+      }
     }
   }
   return (
@@ -70,6 +76,7 @@ const OTPPage = () => {
             required
           />
         </Field>
+        <div id="clerk-captcha"></div>
         <Field>
           <Button type="submit" disabled={!isLoaded}>
             Reset Password
