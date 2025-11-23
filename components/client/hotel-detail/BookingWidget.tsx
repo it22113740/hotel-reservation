@@ -26,9 +26,15 @@ const BookingWidget = ({ hotelId, price, rating, reviews }: BookingWidgetProps) 
     if (checkInDate && checkOutDate) {
       const start = new Date(checkInDate)
       const end = new Date(checkOutDate)
-      const diffTime = Math.abs(end.getTime() - start.getTime())
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      setNights(diffDays || 1)
+      const diffTime = end.getTime() - start.getTime()
+      // Validate checkout is after checkin
+      if (diffTime <= 0) {
+        setNights(1)
+        return
+      }
+      // Calculate full days (round to handle timezone/DST)
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+      setNights(diffDays)
     }
   }
 
