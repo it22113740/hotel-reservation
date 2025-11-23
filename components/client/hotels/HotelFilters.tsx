@@ -23,16 +23,18 @@ export interface FilterState {
   sortBy: string
 }
 
+const DEFAULT_FILTERS: FilterState = {
+  search: "",
+  location: "",
+  priceRange: [0, 500],
+  rating: 0,
+  amenities: [],
+  sortBy: "recommended"
+}
+
 const HotelFilters = ({ onFilterChange, onReset, totalResults }: HotelFiltersProps) => {
   const [isExpanded, setIsExpanded] = useState(true)
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    location: "",
-    priceRange: [0, 500],
-    rating: 0,
-    amenities: [],
-    sortBy: "recommended"
-  })
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
 
   const amenitiesList = [
     { id: "wifi", label: "Free WiFi" },
@@ -71,7 +73,7 @@ const HotelFilters = ({ onFilterChange, onReset, totalResults }: HotelFiltersPro
     onReset()
   }
 
-  const activeFiltersCount = 
+  const activeFiltersCount =
     (filters.search ? 1 : 0) +
     (filters.location ? 1 : 0) +
     (filters.rating > 0 ? 1 : 0) +
@@ -171,21 +173,19 @@ const HotelFilters = ({ onFilterChange, onReset, totalResults }: HotelFiltersPro
               <button
                 key={rating}
                 onClick={() => updateFilter("rating", rating === filters.rating ? 0 : rating)}
-                className={`w-full flex items-center gap-2 p-2.5 rounded-lg border transition-all ${
-                  filters.rating === rating
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                }`}
+                className={`w-full flex items-center gap-2 p-2.5 rounded-lg border transition-all ${filters.rating === rating
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                  }`}
               >
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${
-                        i < rating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
+                      className={`w-4 h-4 ${i < rating
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                        }`}
                     />
                   ))}
                 </div>
