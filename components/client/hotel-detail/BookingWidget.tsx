@@ -129,7 +129,7 @@ const BookingWidget = ({ hotelId, price, rating, reviews }: BookingWidgetProps) 
         {/* Reserve Button */}
         <Button
           onClick={handleBooking}
-          disabled={!checkIn || !checkOut}
+          disabled={!checkIn || !checkOut || nights === 0}
           className="w-full h-12 text-base font-semibold"
         >
           Reserve Now
