@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight, Grid3x3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,23 @@ interface ImageGalleryProps {
 const ImageGallery = ({ images, hotelName }: ImageGalleryProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  // Handle keyboard navigation in modal
+  useEffect(() => {
+    if (!isModalOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsModalOpen(false)
+      } else if (e.key === 'ArrowLeft') {
+        previousImage()
+      } else if (e.key === 'ArrowRight') {
+        nextImage()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isModalOpen])
 
   const openModal = (index: number) => {
     setCurrentImageIndex(index)
@@ -32,7 +49,7 @@ const ImageGallery = ({ images, hotelName }: ImageGalleryProps) => {
       {/* Gallery Grid */}
       <div className="grid grid-cols-4 gap-2 h-[400px] md:h-[500px] rounded-xl overflow-hidden">
         {/* Main Image */}
-        <div 
+        <div
           className="col-span-4 md:col-span-2 row-span-2 relative cursor-pointer group"
           onClick={() => openModal(0)}
         >
@@ -75,7 +92,12 @@ const ImageGallery = ({ images, hotelName }: ImageGalleryProps) => {
 
       {/* Fullscreen Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image gallery"
+        >
           {/* Close Button */}
           <button
             onClick={() => setIsModalOpen(false)}
