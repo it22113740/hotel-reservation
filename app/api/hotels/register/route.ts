@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
             city: city,
             country: country,
             fullAddress: address,
-            ownerName: clerkUser.firstName + ' ' + clerkUser.lastName,
+            ownerName: [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || ownerName,  // Fallback to form's ownerName if Clerk names unavailable
             contactEmail: contactEmail,
             contactPhone: phone,
             images: imageUrls,
