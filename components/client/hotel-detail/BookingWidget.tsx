@@ -141,7 +141,7 @@ const BookingWidget = ({ hotelId, price, rating, reviews }: BookingWidgetProps) 
       </div>
 
       {/* Price Breakdown */}
-      {checkIn && checkOut && (
+      {checkIn && checkOut && nights > 0 && (
         <div className="border-t border-gray-200 pt-4 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">${price} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
