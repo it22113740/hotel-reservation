@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Upload, Building2, User, Mail, Phone, MapPin, FileText } from "lucide-react"
+import { Upload, Building2, User, Mail, Phone, MapPin, FileText, X, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import Image from "next/image"
 
 interface PartnerFormData {
   // Hotel Information
@@ -28,6 +29,7 @@ interface PartnerFormData {
 const PartnerRegisterPage = () => {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [formData, setFormData] = useState<PartnerFormData>({
     hotelName: "",
     description: "",
@@ -40,13 +42,52 @@ const PartnerRegisterPage = () => {
     images: [],
   })
 
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [imagePreviews])
+
   const handleInputChange = (field: keyof PartnerFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
+    
+    // Limit to 10 images
+    if (files.length > 10) {
+      toast.error('Maximum 10 images allowed')
+      return
+    }
+
+    // Validate file sizes (max 10MB each)
+    const invalidFiles = files.filter(file => file.size > 10 * 1024 * 1024)
+    if (invalidFiles.length > 0) {
+      toast.error('Some files exceed 10MB limit')
+      return
+    }
+
+    // Clean up old preview URLs
+    imagePreviews.forEach(url => URL.revokeObjectURL(url))
+
+    // Create new preview URLs
+    const newPreviews = files.map(file => URL.createObjectURL(file))
+    setImagePreviews(newPreviews)
     setFormData(prev => ({ ...prev, images: files }))
+  }
+
+  const removeImage = (index: number) => {
+    // Revoke the URL for the removed image
+    URL.revokeObjectURL(imagePreviews[index])
+
+    // Remove from both arrays
+    const newImages = formData.images.filter((_, i) => i !== index)
+    const newPreviews = imagePreviews.filter((_, i) => i !== index)
+    
+    setFormData(prev => ({ ...prev, images: newImages }))
+    setImagePreviews(newPreviews)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,35 +284,92 @@ const PartnerRegisterPage = () => {
 
             <div>
               <Label htmlFor="images" className="mb-3 block">Upload Images (Max 10) *</Label>
-              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary transition-colors cursor-pointer">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="images"
-                      className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80"
-                    >
-                      <span>Upload files</span>
-                      <input
-                        id="images"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={handleImageUpload}
-                        required
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+              
+              {/* Upload Area - Show only if no images or less than 10 */}
+              {formData.images.length < 10 && (
+                <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary transition-colors cursor-pointer mb-6">
+                  <div className="space-y-1 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="flex text-sm text-gray-600">
+                      <label
+                        htmlFor="images"
+                        className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80"
+                      >
+                        <span>Upload files</span>
+                        <input
+                          id="images"
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={handleImageUpload}
+                          required={formData.images.length === 0}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
+                    {formData.images.length > 0 && (
+                      <p className="text-sm font-medium text-primary mt-2">
+                        {formData.images.length} of 10 images selected
+                      </p>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
-                  {formData.images.length > 0 && (
-                    <p className="text-sm font-medium text-primary mt-2">
-                      {formData.images.length} file(s) selected
-                    </p>
-                  )}
                 </div>
-              </div>
+              )}
+
+              {/* Image Previews Grid */}
+              {imagePreviews.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-700">
+                      Selected Images ({imagePreviews.length}/10)
+                    </p>
+                    {formData.images.length === 10 && (
+                      <p className="text-xs text-gray-500">Maximum limit reached</p>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div
+                        key={index}
+                        className="relative group aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary transition-colors"
+                      >
+                        <Image
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        
+                        {/* Remove Button */}
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          aria-label="Remove image"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+
+                        {/* Image Number Badge */}
+                        <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-xs rounded-md">
+                          {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {imagePreviews.length === 0 && (
+                <div className="text-center py-4">
+                  <ImageIcon className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                  <p className="text-sm text-gray-500">No images selected yet</p>
+                </div>
+              )}
             </div>
           </div>
 
