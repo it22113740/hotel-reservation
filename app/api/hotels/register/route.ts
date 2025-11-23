@@ -115,14 +115,25 @@ export async function POST(request: NextRequest) {
             }, { status: 409 });
         }
 
-        function generateSlug(name: string): string {
-            return name.toLowerCase().replace(/ /g, '-');
+        function generateSlug(name: string, suffix?: number): string {
+            const baseSlug = name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphens
+                .replace(/^-+|-+$/g, '');      // Remove leading/trailing hyphens
+            return suffix ? `${baseSlug}-${suffix}` : baseSlug;
         }
-        const slug = generateSlug(hotelName);
-        if (await Hotel.findOne({ slug: slug })) {
+
+        // Generate unique slug with collision handling
+        let slug = generateSlug(hotelName);
+        let suffix = 1;
+        while (await Hotel.findOne({ slug })) {
+            slug = generateSlug(hotelName, suffix++);
+        }
+
+        if (suffix > 100) {  // Prevent infinite loops
             return NextResponse.json({
-                error: 'A hotel with this name already exists'
-            }, { status: 409 });
+                error: 'Unable to generate unique slug. Please use a different hotel name.'
+            }, { status: 400 });
         }
 
         // 10. Create hotel registration
