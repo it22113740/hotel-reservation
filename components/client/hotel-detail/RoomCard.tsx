@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Users, Bed, Maximize, Wifi, Coffee, Check } from "lucide-react"
+import { JSX } from "react"
 
 interface Room {
   id: string

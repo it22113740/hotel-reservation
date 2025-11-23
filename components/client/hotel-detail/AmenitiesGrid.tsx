@@ -13,6 +13,7 @@ import {
   Smartphone,
   Check
 } from "lucide-react"
+import { JSX } from "react"
 
 interface AmenitiesGridProps {
   amenities: string[]
