@@ -44,11 +44,6 @@ interface IHotel {
     languages: string[]             // Languages spoken by staff
     policies: string[]              // Hotel rules and policies
 
-    // Rooms
-    rooms: IRoom[]                   // Available room types
-
-    // Reviews
-    reviewsList: IReview[]           // Guest reviews
 
     // Metadata
     verified?: boolean              // Property verification status
