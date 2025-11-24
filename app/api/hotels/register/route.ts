@@ -106,13 +106,12 @@ export async function POST(request: NextRequest) {
         // console.log('Array of image URLs:',imageUrls);
         // 8. Check if hotel with same name already exists for this user
         const existingHotel = await Hotel.findOne({
-            ownerId: userId,
-            name: hotelName
+            ownerId: userId
         });
 
         if (existingHotel) {
             return NextResponse.json({
-                error: 'You already have a hotel with this name'
+                error: 'You already have a hotel registered. Each owner can only register one hotel.'
             }, { status: 409 });
         }
 
