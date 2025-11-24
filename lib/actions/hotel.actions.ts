@@ -62,11 +62,17 @@ export async function updateHotelStatus(hotelId: string, status: 'pending' | 'ap
     await hotel.save()
 
     if (status === 'approved') {
+      if (!hotel.contactEmail || !hotel.ownerName) {
+        throw new Error('Hotel contact information is incomplete')
+      }
       await updateManagerUser({ email: hotel.contactEmail as string })
 
       await sendHotelApprovalEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, email: hotel.contactEmail as string, loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login` })
 
     } else if (status === 'rejected') {
+      if (!hotel.contactEmail || !hotel.ownerName) {
+        throw new Error('Hotel contact information is incomplete')
+      }
       await sendHotelRejectionEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, reason: 'Hotel not approved' })
     }
 
