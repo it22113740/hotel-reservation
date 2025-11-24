@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.35.4",
+    "@getbrevo/brevo": "^3.0.1",
     "@heroui/card": "^2.2.25",
     "@heroui/navbar": "^2.2.25",
     "@radix-ui/react-label": "^2.1.8",

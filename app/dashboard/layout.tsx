@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   }
 
   const user = await currentUser()
-  const userRole = user?.publicMetadata?.role as string
+  const userRole = user?.unsafeMetadata?.role as string
 
   return (
     <div className="flex h-screen bg-gray-50">

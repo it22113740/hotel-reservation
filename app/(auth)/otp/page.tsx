@@ -30,11 +30,18 @@ const OTPPage = () => {
       })
 
       if (result.status === 'complete') {
+        // ✅ Activate the session
+        await setActive({ session: result.createdSessionId })
         toast.success('Password reset successful')
         setCode('')
         setNewPassword('')
         // Redirect to login page for user to login with new password
-        router.push('/login')
+        //Session Already Active so no need to set active session here so we can use the same session for login with new password and redirect to home page
+        // reload the page to refresh the session
+        // ✅ CRITICAL FIX: Add delay for session to fully propagate
+        setTimeout(() => {
+          router.push('/')
+        }, 1000) // 1 second delay
       }
     } catch (err: unknown) {
       if (isClerkAPIResponseError(err)) {
