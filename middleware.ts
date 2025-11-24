@@ -23,14 +23,31 @@ const isAuthRoute = createRouteMatcher([
   '/otp(.*)',
 ]);
 
+
+// ✅ ADD THESE - Role-based route matchers
+const isAdminRoute = createRouteMatcher(['/dashboard/admin(.*)']);
+const isManagerRoute = createRouteMatcher(['/dashboard/manager(.*)']);
+
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
   const { pathname } = req.nextUrl;
 
-  // If user is logged in and trying to access auth routes, redirect to home
+  // If user is logged in and trying to access auth routes, redirect based on role
   if (userId && isAuthRoute(req)) {
-    const homeUrl = new URL('/', req.url);
-    return NextResponse.redirect(homeUrl);
+    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+    
+    // Redirect admin to admin dashboard
+    if (userRole === 'admin') {
+      return NextResponse.redirect(new URL('/dashboard/admin', req.url));
+    }
+    
+    // Redirect manager to manager dashboard
+    if (userRole === 'manager') {
+      return NextResponse.redirect(new URL('/dashboard/manager', req.url));
+    }
+    
+    // Regular users go to home
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // If user is not logged in and trying to access protected routes, redirect to login
@@ -38,6 +55,38 @@ export default clerkMiddleware(async (auth, req) => {
     const loginUrl = new URL('/login', req.url);
     loginUrl.searchParams.set('redirect_url', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // // Auto-redirect admin to dashboard when visiting homepage
+  // if (userId && pathname === '/') {
+  //   const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+    
+  //   if (userRole === 'admin') {
+  //     return NextResponse.redirect(new URL('/dashboard/admin', req.url));
+  //   }
+    
+  //   if (userRole === 'manager') {
+  //     return NextResponse.redirect(new URL('/dashboard/manager', req.url));
+  //   }
+  // }
+  // ✅ ADD THIS - Admin route protection
+  if (userId && isAdminRoute(req)) {
+    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+
+    if (userRole !== 'admin') {
+      // Non-admin trying to access admin routes
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+  }
+
+  // ✅ FIXED - Manager route protection
+  if (userId && isManagerRoute(req)) {
+    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+
+    if (userRole !== 'manager' && userRole !== 'admin') {
+      // Non-manager trying to access manager routes
+      return NextResponse.redirect(new URL('/', req.url));
+    }
   }
 
   return NextResponse.next();

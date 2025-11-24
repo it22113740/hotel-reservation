@@ -20,6 +20,8 @@ export default function LoginPage() {
   const { isLoaded, signIn, setActive } = useSignIn()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  const [needsSecondFactor, setNeedsSecondFactor] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get('redirect_url') || '/'
@@ -39,11 +41,51 @@ export default function LoginPage() {
         toast.success('Login successful')
         router.push(redirectUrl)
       }
+
+      if (result.status === 'needs_second_factor') {
+        const emailCodeFactor = result.supportedSecondFactors?.find(
+          (factor) => factor.strategy === 'email_code'
+        )
+
+        if (emailCodeFactor) {
+          await signIn.prepareSecondFactor({
+            strategy: 'email_code',
+            emailAddressId: emailCodeFactor.emailAddressId,
+          })
+
+          setNeedsSecondFactor(true)
+          toast.info('Verification code sent to your email')
+        }
+      }
     } catch (error: unknown) {
       if (isClerkAPIResponseError(error)) {
         toast.error(error.errors?.[0]?.message || 'Invalid email or password')
       } else {
         toast.error('An error occurred during login')
+      }
+    }
+  }
+
+  const handleVerifyCode = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!isLoaded) return
+
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: 'email_code',
+        code,
+      })
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
+        toast.success('Login successful')
+        router.push(redirectUrl)
+      }
+    } catch (error: unknown) {
+      if (isClerkAPIResponseError(error)) {
+        toast.error(error.errors?.[0]?.message || 'Invalid verification code')
+      } else {
+        toast.error('An error occurred during verification')
       }
     }
   }
@@ -59,6 +101,51 @@ export default function LoginPage() {
     } catch (error: unknown) {
       toast.error('Failed to sign in with Google')
     }
+  }
+
+  // Show verification code form if 2FA is required
+  if (needsSecondFactor) {
+    return (
+      <form className="flex flex-col gap-6" onSubmit={handleVerifyCode}>
+        <FieldGroup>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <h1 className="text-2xl font-bold">Verify your email</h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              Enter the verification code sent to {email}
+            </p>
+          </div>
+          <Field>
+            <FieldLabel htmlFor="code">Verification Code</FieldLabel>
+            <Input
+              id="code"
+              type="text"
+              placeholder="123456"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoComplete="one-time-code"
+            />
+          </Field>
+          <Field>
+            <Button type="submit" disabled={!isLoaded}>
+              Verify & Login
+            </Button>
+          </Field>
+          <FieldDescription className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setNeedsSecondFactor(false)
+                setCode('')
+              }}
+              className="underline underline-offset-4"
+            >
+              Back to login
+            </button>
+          </FieldDescription>
+        </FieldGroup>
+      </form>
+    )
   }
 
   return (
