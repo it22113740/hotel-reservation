@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  Building2, 
-  MapPin, 
-  Mail, 
-  Phone, 
+import {
+  Building2,
+  MapPin,
+  Mail,
+  Phone,
   Calendar,
   Eye,
   Check,
@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { updateHotelStatus } from '@/lib/actions/hotel.actions'
+import { toast } from 'sonner'
 
 interface HotelRegistration {
   _id: string
@@ -53,7 +54,7 @@ interface HotelRegistration {
   featured: boolean
 }
 
-export default function RegistrationsPage( { data }: { data: HotelRegistration[] } ) {
+export default function RegistrationsPage({ data }: { data: HotelRegistration[] }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending')
   const [selectedRegistration, setSelectedRegistration] = useState<HotelRegistration | null>(null)
@@ -72,8 +73,8 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
   // Filter registrations
   const filteredRegistrations = registrations.filter(reg => {
     const matchesSearch = (reg.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (reg.city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (reg.ownerName || '').toLowerCase().includes(searchQuery.toLowerCase())
+      (reg.city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (reg.ownerName || '').toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === 'all' || reg.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -86,16 +87,28 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
   const confirmAction = async () => {
     if (!showConfirmDialog.id || !showConfirmDialog.action) return
 
-    setRegistrations(prev => prev.map(reg => 
-      reg.id === showConfirmDialog.id 
-        ? { ...reg, status: showConfirmDialog.action === 'approve' ? 'approved' : 'rejected' }
-        : reg
-    ))
+    const newStatus =
+      showConfirmDialog.action === 'approve' ? 'approved' : 'rejected'
 
-    setShowConfirmDialog({ show: false, action: null, id: null })
-    setShowDetailModal(false)
+    try {
+      await updateHotelStatus(showConfirmDialog.id, newStatus)
 
-    await updateHotelStatus(showConfirmDialog.id, showConfirmDialog.action === 'approve' ? 'approved' : 'rejected')
+      setRegistrations(prev =>
+        prev.map(reg =>
+          reg.id === showConfirmDialog.id ? { ...reg, status: newStatus } : reg
+        )
+      )
+
+      setShowConfirmDialog({ show: false, action: null, id: null })
+      setShowDetailModal(false)
+      toast.success('Hotel status updated successfully', {
+        description: 'The hotel status has been updated successfully'
+      })
+    } catch {
+      toast.error('Failed to update hotel status', {
+        description: 'Please try again later'
+      })
+    }
   }
 
   // View details
@@ -122,7 +135,7 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
       approved: 'bg-green-100 text-green-700 border-green-200',
       rejected: 'bg-red-100 text-red-700 border-red-200'
     }
-    
+
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full border ${styles[status as keyof typeof styles]}`}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -272,7 +285,7 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </Button>
-                  
+
                   {registration.status === 'pending' && (
                     <>
                       <Button
@@ -435,9 +448,8 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
           />
           <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl z-50 p-6">
             <div className="text-center">
-              <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center ${
-                showConfirmDialog.action === 'approve' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
+              <div className={`w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center ${showConfirmDialog.action === 'approve' ? 'bg-green-100' : 'bg-red-100'
+                }`}>
                 {showConfirmDialog.action === 'approve' ? (
                   <Check className="w-6 h-6 text-green-600" />
                 ) : (
@@ -462,11 +474,10 @@ export default function RegistrationsPage( { data }: { data: HotelRegistration[]
                 </Button>
                 <Button
                   onClick={confirmAction}
-                  className={`flex-1 ${
-                    showConfirmDialog.action === 'approve'
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-red-600 hover:bg-red-700'
-                  }`}
+                  className={`flex-1 ${showConfirmDialog.action === 'approve'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-red-600 hover:bg-red-700'
+                    }`}
                 >
                   {showConfirmDialog.action === 'approve' ? 'Approve' : 'Reject'}
                 </Button>
