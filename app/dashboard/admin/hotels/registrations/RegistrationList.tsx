@@ -64,6 +64,7 @@ export default function RegistrationsPage({ data }: { data: HotelRegistration[] 
     action: null,
     id: null
   })
+  const [rejectionReason, setRejectionReason] = useState('')
 
   // Map _id to id and initialize state
   const [registrations, setRegistrations] = useState<HotelRegistration[]>(
@@ -87,11 +88,17 @@ export default function RegistrationsPage({ data }: { data: HotelRegistration[] 
   const confirmAction = async () => {
     if (!showConfirmDialog.id || !showConfirmDialog.action) return
 
+    // Validate rejection reason if rejecting
+    if (showConfirmDialog.action === 'reject' && !rejectionReason.trim()) {
+      toast.error('Please provide a rejection reason')
+      return
+    }
+
     const newStatus =
       showConfirmDialog.action === 'approve' ? 'approved' : 'rejected'
 
     try {
-      await updateHotelStatus(showConfirmDialog.id, newStatus)
+      await updateHotelStatus(showConfirmDialog.id, newStatus, rejectionReason)
 
       setRegistrations(prev =>
         prev.map(reg =>
@@ -101,9 +108,18 @@ export default function RegistrationsPage({ data }: { data: HotelRegistration[] 
 
       setShowConfirmDialog({ show: false, action: null, id: null })
       setShowDetailModal(false)
-      toast.success('Hotel status updated successfully', {
-        description: 'The hotel status has been updated successfully'
-      })
+      setRejectionReason('') // Clear rejection reason
+      
+      toast.success(
+        showConfirmDialog.action === 'approve' 
+          ? 'Hotel approved successfully!' 
+          : 'Hotel rejected successfully',
+        {
+          description: showConfirmDialog.action === 'approve'
+            ? 'Owner will receive an email with login instructions'
+            : 'Owner will receive an email with the rejection reason'
+        }
+      )
     } catch {
       toast.error('Failed to update hotel status', {
         description: 'Please try again later'
@@ -444,7 +460,10 @@ export default function RegistrationsPage({ data }: { data: HotelRegistration[] 
         <>
           <div
             className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setShowConfirmDialog({ show: false, action: null, id: null })}
+            onClick={() => {
+              setShowConfirmDialog({ show: false, action: null, id: null })
+              setRejectionReason('')
+            }}
           />
           <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl z-50 p-6">
             <div className="text-center">
@@ -461,23 +480,51 @@ export default function RegistrationsPage({ data }: { data: HotelRegistration[] 
               </h3>
               <p className="text-gray-600 mb-6">
                 {showConfirmDialog.action === 'approve'
-                  ? 'This hotel will be approved and listed on the platform.'
+                  ? 'This hotel will be approved and listed on the platform. The owner will receive an email with login instructions.'
                   : 'This hotel registration will be rejected and the owner will be notified.'}
               </p>
+
+              {/* Rejection Reason Input */}
+              {showConfirmDialog.action === 'reject' && (
+                <div className="mb-6 text-left">
+                  <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 mb-2">
+                    Reason for Rejection <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="rejectionReason"
+                    rows={4}
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="Please provide a clear reason for rejection. This will be sent to the hotel owner."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none text-sm"
+                    required
+                  />
+                  {rejectionReason.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {rejectionReason.length} characters
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => setShowConfirmDialog({ show: false, action: null, id: null })}
+                  onClick={() => {
+                    setShowConfirmDialog({ show: false, action: null, id: null })
+                    setRejectionReason('')
+                  }}
                   className="flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={confirmAction}
+                  disabled={showConfirmDialog.action === 'reject' && !rejectionReason.trim()}
                   className={`flex-1 ${showConfirmDialog.action === 'approve'
                     ? 'bg-green-600 hover:bg-green-700'
                     : 'bg-red-600 hover:bg-red-700'
-                    }`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {showConfirmDialog.action === 'approve' ? 'Approve' : 'Reject'}
                 </Button>

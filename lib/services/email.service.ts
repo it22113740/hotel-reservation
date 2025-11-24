@@ -4,6 +4,10 @@ import * as brevo from '@getbrevo/brevo'
 
 // Initialize Brevo API
 const apiInstance = new brevo.TransactionalEmailsApi()
+
+if (!process.env.BREVO_API_KEY) {
+    throw new Error('BREVO_API_KEY environment variable is not set')
+}
 apiInstance.setApiKey(
     brevo.TransactionalEmailsApiApiKeys.apiKey,
     process.env.BREVO_API_KEY || ''
@@ -141,7 +145,7 @@ export async function sendHotelRejectionEmail({
 
         sendSmtpEmail.sender = {
             name: 'LankaStay',
-            email: 'noreply@lankastay.com'
+            email: 'siritharsanthosh@gmail.com'
         }
 
         sendSmtpEmail.to = [{ email: to, name: ownerName }]

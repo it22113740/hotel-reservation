@@ -14,7 +14,7 @@ export async function getRegistrations(filters: {
   const { sessionClaims } = await auth()
 
   // Check admin role
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+  const userRole = (sessionClaims?.unsafeMetadata as { role?: string })?.role;
   if (userRole !== 'admin') {
     throw new Error('Unauthorized')
   }
@@ -38,12 +38,12 @@ export async function getRegistrations(filters: {
   return JSON.parse(JSON.stringify(registrations))
 }
 
-export async function updateHotelStatus(hotelId: string, status: 'pending' | 'approved' | 'rejected') {
+export async function updateHotelStatus(hotelId: string, status: 'pending' | 'approved' | 'rejected', rejectionReason?: string) {
   try {
     const { sessionClaims } = await auth()
 
     // Check admin role
-    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+    const userRole = (sessionClaims?.unsafeMetadata as { role?: string })?.role;
     if (userRole !== 'admin') {
       throw new Error('Unauthorized')
     }
@@ -73,7 +73,7 @@ export async function updateHotelStatus(hotelId: string, status: 'pending' | 'ap
       if (!hotel.contactEmail || !hotel.ownerName) {
         throw new Error('Hotel contact information is incomplete')
       }
-      await sendHotelRejectionEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, reason: 'Hotel not approved' })
+      await sendHotelRejectionEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, reason: rejectionReason })
     }
 
     // Revalidate the registrations page - Reson for this is to show the updated status in the table
@@ -85,7 +85,8 @@ export async function updateHotelStatus(hotelId: string, status: 'pending' | 'ap
         ? 'Hotel approved and manager account created successfully'
         : 'Hotel rejected and notification sent'
     }
-  } catch {
+  } catch(error) {
+    console.error(error)
     return {
       success: false,
       message: 'Failed to update hotel status'
