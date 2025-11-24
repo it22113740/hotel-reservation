@@ -31,21 +31,22 @@ const isManagerRoute = createRouteMatcher(['/dashboard/manager(.*)']);
 export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims } = await auth();
   const { pathname } = req.nextUrl;
+  const userRole = (sessionClaims?.unsafeMetadata as { role?: string })?.role;
 
   // If user is logged in and trying to access auth routes, redirect based on role
   if (userId && isAuthRoute(req)) {
-    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
-    
+    console.log('sessionClaims', sessionClaims)
+
     // Redirect admin to admin dashboard
     if (userRole === 'admin') {
       return NextResponse.redirect(new URL('/dashboard/admin', req.url));
     }
-    
+
     // Redirect manager to manager dashboard
     if (userRole === 'manager') {
       return NextResponse.redirect(new URL('/dashboard/manager', req.url));
     }
-    
+
     // Regular users go to home
     return NextResponse.redirect(new URL('/', req.url));
   }
@@ -57,34 +58,38 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // // Auto-redirect admin to dashboard when visiting homepage
-  // if (userId && pathname === '/') {
-  //   const userRole = (sessionClaims?.metadata as { role?: string })?.role;
-    
-  //   if (userRole === 'admin') {
-  //     return NextResponse.redirect(new URL('/dashboard/admin', req.url));
-  //   }
-    
-  //   if (userRole === 'manager') {
-  //     return NextResponse.redirect(new URL('/dashboard/manager', req.url));
-  //   }
-  // }
-  // ✅ ADD THIS - Admin route protection
-  if (userId && isAdminRoute(req)) {
-    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+  // Auto-redirect admin to dashboard when visiting homepage
+  if (userId && pathname === '/') {
+    if (userRole === 'admin') {
+      return NextResponse.redirect(new URL('/dashboard/admin', req.url));
+    }
 
+    if (userRole === 'manager') {
+      return NextResponse.redirect(new URL('/dashboard/manager', req.url));
+    }
+  }
+  // ✅ Admin route protection
+  if (userId && isAdminRoute(req)) {
     if (userRole !== 'admin') {
-      // Non-admin trying to access admin routes
+      console.log(`${userRole} trying to access admin route, redirecting...`);
+
+      // Redirect to appropriate dashboard based on role
+      if (userRole === 'manager') {
+        return NextResponse.redirect(new URL('/dashboard/manager', req.url));
+      }
       return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
-  // ✅ FIXED - Manager route protection
+  // ✅ Manager route protection
   if (userId && isManagerRoute(req)) {
-    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+    if (userRole !== 'manager') {
+      console.log(`${userRole} trying to access manager route, redirecting...`);
 
-    if (userRole !== 'manager' && userRole !== 'admin') {
-      // Non-manager trying to access manager routes
+      // Redirect to appropriate dashboard based on role
+      if (userRole === 'admin') {
+        return NextResponse.redirect(new URL('/dashboard/admin', req.url));
+      }
       return NextResponse.redirect(new URL('/', req.url));
     }
   }

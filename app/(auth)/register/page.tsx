@@ -39,8 +39,10 @@ export default function RegisterPage() {
         lastName,
         emailAddress: email,
         password,
+        unsafeMetadata: {
+          role: 'user'
+        }
       })
-
       // Send email verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
       setPendingVerification(true)
@@ -82,15 +84,18 @@ export default function RegisterPage() {
 
   const handleGoogleSignUp = async () => {
     if (!isLoaded) return
-    
+
     // Clear any stale error messages
     setError('')
-    
+
     try {
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: '/',
+        unsafeMetadata: {
+          role: 'user'
+        }
       })
       // If we reach here, redirect initiation succeeded
       toast.success('Redirecting to Google...')

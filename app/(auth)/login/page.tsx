@@ -23,8 +23,8 @@ export default function LoginPage() {
   const [code, setCode] = useState('')
   const [needsSecondFactor, setNeedsSecondFactor] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectUrl = searchParams.get('redirect_url') || '/'
+  const redirectUrl = '/'
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -159,13 +159,13 @@ export default function LoginPage() {
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input 
-            id="email" 
-            type="email" 
-            placeholder="m@example.com" 
-            required 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </Field>
         <Field>
@@ -178,12 +178,12 @@ export default function LoginPage() {
               Forgot your password?
             </a>
           </div>
-          <Input 
-            id="password" 
-            type="password" 
-            required 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </Field>
         <div id="clerk-captcha"></div>

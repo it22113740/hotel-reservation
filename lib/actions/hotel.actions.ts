@@ -3,6 +3,9 @@
 import Hotel from '@/databases/hotel.model'
 import { auth } from '@clerk/nextjs/server'
 import dbConnect from '../db'
+import { updateManagerUser } from '../services/clerk.service'
+import { sendHotelApprovalEmail, sendHotelRejectionEmail } from '../services/email.service'
+import { revalidatePath } from 'next/cache'
 
 export async function getRegistrations(filters: {
   status?: 'pending' | 'approved' | 'rejected'
@@ -36,16 +39,50 @@ export async function getRegistrations(filters: {
 }
 
 export async function updateHotelStatus(hotelId: string, status: 'pending' | 'approved' | 'rejected') {
-  const { sessionClaims } = await auth()
+  try {
+    const { sessionClaims } = await auth()
 
-  // Check admin role
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role;
-  if (userRole !== 'admin') {
-    throw new Error('Unauthorized')
+    // Check admin role
+    const userRole = (sessionClaims?.metadata as { role?: string })?.role;
+    if (userRole !== 'admin') {
+      throw new Error('Unauthorized')
+    }
+
+    await dbConnect()
+
+    const hotel = await Hotel.findById(hotelId)
+    if (!hotel) {
+      throw new Error('Hotel not found')
+    }
+    hotel.status = status
+    if (status === 'approved') {
+      hotel.verified = true
+    }
+
+    await hotel.save()
+
+    if (status === 'approved') {
+      await updateManagerUser({ email: hotel.contactEmail as string })
+
+      await sendHotelApprovalEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, email: hotel.contactEmail as string, loginUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login` })
+
+    } else if (status === 'rejected') {
+      await sendHotelRejectionEmail({ to: hotel.contactEmail as string, hotelName: hotel.name, ownerName: hotel.ownerName as string, reason: 'Hotel not approved' })
+    }
+
+    // Revalidate the registrations page - Reson for this is to show the updated status in the table
+    revalidatePath('/dashboard/admin/hotels/registrations')
+
+
+    return {
+      success: true, message: status === 'approved'
+        ? 'Hotel approved and manager account created successfully'
+        : 'Hotel rejected and notification sent'
+    }
+  } catch {
+    return {
+      success: false,
+      message: 'Failed to update hotel status'
+    }
   }
-
-  await dbConnect()
-
-  const hotel = await Hotel.findByIdAndUpdate(hotelId, { status }, { new: true }).lean()
-  return JSON.parse(JSON.stringify(hotel))
 }
