@@ -23,7 +23,8 @@ export default function LoginPage() {
   const [code, setCode] = useState('')
   const [needsSecondFactor, setNeedsSecondFactor] = useState(false)
   const router = useRouter()
-  const redirectUrl = '/'
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams.get('redirect_url') || '/'
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
