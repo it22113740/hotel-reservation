@@ -22,37 +22,7 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { updateHotelStatus } from '@/lib/actions/hotel.actions'
 import { toast } from 'sonner'
-
-interface HotelRegistration {
-  _id: string
-  id: string
-  name: string
-  slug: string
-  description: string
-  city: string
-  country: string
-  fullAddress: string
-  location: string
-  ownerName: string
-  contactEmail: string
-  contactPhone: string
-  images: string[]
-  status: 'pending' | 'approved' | 'rejected'
-  createdAt: string
-  updatedAt: string
-  ownerId: string
-  price: number
-  currency: string
-  rating: number
-  reviewsCount: number
-  amenities: string[]
-  checkIn: string
-  checkOut: string
-  languages: string[]
-  policies: string[]
-  verified: boolean
-  featured: boolean
-}
+import { HotelRegistration } from '@/types'
 
 export default function RegistrationsPage({ data }: { data: HotelRegistration[] }) {
   const [searchQuery, setSearchQuery] = useState('')

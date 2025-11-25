@@ -1,37 +1,7 @@
 // app/dashboard/admin/hotels/registrations/page.tsx
 import { getRegistrations } from '@/lib/actions/hotel.actions'
 import RegistrationList from './RegistrationList'
-
-interface HotelRegistration {
-    _id: string
-    id: string
-    name: string
-    slug: string
-    description: string
-    city: string
-    country: string
-    fullAddress: string
-    location: string
-    ownerName: string
-    contactEmail: string
-    contactPhone: string
-    images: string[]
-    status: 'pending' | 'approved' | 'rejected'
-    createdAt: string
-    updatedAt: string
-    ownerId: string
-    price: number
-    currency: string
-    rating: number
-    reviewsCount: number
-    amenities: string[]
-    checkIn: string
-    checkOut: string
-    languages: string[]
-    policies: string[]
-    verified: boolean
-    featured: boolean
-}
+import { HotelRegistration } from '@/types'
 
 export default async function RegistrationsPage() {
     // ✅ Direct fetch on server

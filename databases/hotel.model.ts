@@ -3,7 +3,7 @@ import Room from './room.model';
 import Review from './review.model';
 import { IRoom } from './room.model';
 import { IReview } from './review.model';
-
+import { HotelStatus } from '@/types';
 
 // Main Hotel Interface
 interface IHotel {
@@ -48,7 +48,7 @@ interface IHotel {
     // Metadata
     verified?: boolean              // Property verification status
     featured?: boolean              // Featured on homepage
-    status: 'pending' | 'approved' | 'rejected'                // "pending", "approved", "rejected"
+    status: HotelStatus                // "pending", "approved", "rejected"
 
     // Owner/Management
     ownerId?: string
