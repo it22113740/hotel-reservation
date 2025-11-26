@@ -90,10 +90,130 @@ const PartnerRegisterPage = () => {
     setImagePreviews(newPreviews)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  // app/(main)/partner-hotel/page.tsx
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  
+  // Validation
+  if (!formData.hotelName.trim()) {
+    toast.error('Hotel name is required')
+    return
   }
+  
+  if (!formData.description.trim()) {
+    toast.error('Description is required')
+    return
+  }
+  
+  if (!formData.city.trim() || !formData.country.trim()) {
+    toast.error('City and country are required')
+    return
+  }
+  
+  if (!formData.address.trim()) {
+    toast.error('Full address is required')
+    return
+  }
+  
+  if (!formData.ownerName.trim()) {
+    toast.error('Owner name is required')
+    return
+  }
+  
+  if (!formData.contactEmail.trim()) {
+    toast.error('Contact email is required')
+    return
+  }
+  
+  if (!formData.phone.trim()) {
+    toast.error('Phone number is required')
+    return
+  }
+  
+  if (formData.images.length === 0) {
+    toast.error('Please upload at least one image')
+    return
+  }
+
+  setIsSubmitting(true)
+
+  try {
+    const submitFormData = new FormData()
+    
+    // Text fields
+    submitFormData.append('hotelName', formData.hotelName.trim())
+    submitFormData.append('description', formData.description.trim())
+    submitFormData.append('city', formData.city.trim())
+    submitFormData.append('country', formData.country.trim())
+    submitFormData.append('address', formData.address.trim())
+    submitFormData.append('ownerName', formData.ownerName.trim())
+    submitFormData.append('contactEmail', formData.contactEmail.trim())
+    submitFormData.append('phone', formData.phone.trim())
+    
+    // Image files
+    formData.images.forEach((image) => {
+      submitFormData.append('images', image)
+    })
+
+    const response = await fetch('/api/hotels/register', {
+      method: 'POST',
+      body: submitFormData,
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      // Handle specific error cases
+      if (response.status === 401) {
+        toast.error('Please log in to register a hotel')
+        router.push('/login?redirect_url=/partner-hotel')
+        return
+      }
+      
+      if (response.status === 409) {
+        toast.error(data.error || 'You already have a hotel registered')
+        return
+      }
+      
+      throw new Error(data.error || 'Failed to submit registration')
+    }
+
+    // Success
+    toast.success(data.message || 'Hotel registration submitted successfully!', {
+      description: 'Your application is pending admin approval. You will receive an email once reviewed.',
+      duration: 5000,
+    })
+    
+    // Reset form
+    setFormData({
+      hotelName: "",
+      description: "",
+      address: "",
+      city: "",
+      country: "",
+      ownerName: "",
+      contactEmail: "",
+      phone: "",
+      images: [],
+    })
+    
+    // Cleanup image previews
+    imagePreviews.forEach(url => URL.revokeObjectURL(url))
+    setImagePreviews([])
+
+    // Redirect to home after 3 seconds
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+
+  } catch (error: any) {
+    console.error('Registration error:', error)
+    toast.error(error.message || 'An unexpected error occurred. Please try again later.')
+  } finally {
+    setIsSubmitting(false)
+  }
+}
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16 relative overflow-hidden">
