@@ -49,6 +49,12 @@ interface IHotel {
     verified?: boolean              // Property verification status
     featured?: boolean              // Featured on homepage
     status: HotelStatus                // "pending", "approved", "rejected"
+    
+    // Publishing
+    publishStatus?: 'draft' | 'publish_requested' | 'published' | 'publish_rejected'  // Publishing workflow status
+    isPublished?: boolean              // Whether hotel is live on client side
+    publishRejectionReason?: string    // Reason if publish was rejected
+    publishChangeRequest?: string      // Admin feedback for changes
 
     // Owner/Management
     ownerId?: string
@@ -104,6 +110,16 @@ const hotelSchema = new Schema<IHotel>({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
+    
+    // ✅ Publishing Status
+    publishStatus: {
+        type: String,
+        enum: ['draft', 'publish_requested', 'published', 'publish_rejected'],
+        default: 'draft'
+    },
+    isPublished: { type: Boolean, default: false },
+    publishRejectionReason: { type: String },
+    publishChangeRequest: { type: String },
 }, { timestamps: true });
 
 // Custom validator for max 10 images

@@ -6,6 +6,11 @@
 export type HotelStatus = 'pending' | 'approved' | 'rejected'
 
 /**
+ * Hotel Publishing Status
+ */
+export type PublishStatus = 'draft' | 'publish_requested' | 'published' | 'publish_rejected'
+
+/**
  * Hotel Registration Interface
  * Used in admin dashboard, API responses, and UI components
  */
@@ -38,6 +43,10 @@ export interface HotelRegistration {
   policies: string[]
   verified: boolean
   featured: boolean
+  publishStatus?: PublishStatus
+  isPublished?: boolean
+  publishRejectionReason?: string
+  publishChangeRequest?: string
 }
 
 /**

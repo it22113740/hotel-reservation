@@ -13,7 +13,8 @@ import {
   BarChart3,
   Hotel,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Database
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -53,7 +54,7 @@ export default function DashboardSidebar({ userRole }: SidebarProps) {
 
   const managerMenuItems: MenuItem[] = [
     { href: '/dashboard/manager', icon: LayoutDashboard, label: 'Overview', submenu: false },
-    { href: '/dashboard/manager/hotels', icon: Hotel, label: 'My Hotels', submenu: false },
+    { href: '/dashboard/manager/hotels', icon: Hotel, label: 'My Hotel', submenu: false },
     { href: '/dashboard/manager/bookings', icon: Calendar, label: 'Bookings', submenu: false },
     { href: '/dashboard/manager/settings', icon: Settings, label: 'Settings', submenu: false },
   ]
