@@ -297,7 +297,7 @@ export async function requestPublish() {
     }
     
     // Wait a moment for the update to propagate
-    await new Promise(resolve => setTimeout(resolve, 200))
+    // await new Promise(resolve => setTimeout(resolve, 200))
     
     // Verify the update worked by querying directly from MongoDB (bypassing Mongoose)
     const verifyDoc = await collection.findOne({ _id: hotelObjectId })
