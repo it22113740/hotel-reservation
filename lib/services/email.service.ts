@@ -6,41 +6,41 @@ import * as brevo from '@getbrevo/brevo'
 const apiInstance = new brevo.TransactionalEmailsApi()
 
 if (!process.env.BREVO_API_KEY) {
-    throw new Error('BREVO_API_KEY environment variable is not set')
+  throw new Error('BREVO_API_KEY environment variable is not set')
 }
 apiInstance.setApiKey(
-    brevo.TransactionalEmailsApiApiKeys.apiKey,
-    process.env.BREVO_API_KEY || ''
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY || ''
 )
 
 interface SendApprovalEmailParams {
-    to: string
-    hotelName: string
-    ownerName: string
-    email: string
-    loginUrl: string
+  to: string
+  hotelName: string
+  ownerName: string
+  email: string
+  loginUrl: string
 }
 
 export async function sendHotelApprovalEmail({
-    to,
-    hotelName,
-    ownerName,
-    email,
-    loginUrl
+  to,
+  hotelName,
+  ownerName,
+  email,
+  loginUrl
 }: SendApprovalEmailParams) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `🎉 Your Hotel "${hotelName}" Has Been Approved!`
+    sendSmtpEmail.subject = `🎉 Your Hotel "${hotelName}" Has Been Approved!`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
   <!DOCTYPE html>
   <html>
   <head>
@@ -120,39 +120,39 @@ export async function sendHotelApprovalEmail({
   </html>
 `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        console.log('✅ Approval email sent:', result)
-        return { success: true, messageId: result.body?.messageId }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    console.log('✅ Approval email sent:', result)
+    return { success: true, messageId: result.body?.messageId }
 
-    } catch {
-        return { success: false, message: 'Failed to send approval email' }
-    }
+  } catch {
+    return { success: false, message: 'Failed to send approval email' }
+  }
 }
 
 export async function sendHotelRejectionEmail({
-    to,
-    hotelName,
-    ownerName,
-    reason
+  to,
+  hotelName,
+  ownerName,
+  reason
 }: {
-    to: string
-    hotelName: string
-    ownerName: string
-    reason?: string
+  to: string
+  hotelName: string
+  ownerName: string
+  reason?: string
 }) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `Application Update: ${hotelName}`
+    sendSmtpEmail.subject = `Application Update: ${hotelName}`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -203,37 +203,46 @@ export async function sendHotelRejectionEmail({
       </html>
     `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        return { success: true, messageId: result.body?.messageId }
-    } catch {
-        return { success: false, message: 'Failed to send rejection email' }
-    }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send rejection email' }
+  }
 }
 
 // ========== PUBLISH WORKFLOW EMAILS ==========
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 export async function sendPublishRequestEmail({
-    to,
-    hotelName,
-    ownerName
+  to,
+  hotelName,
+  ownerName
 }: {
-    to: string
-    hotelName: string
-    ownerName: string
+  to: string
+  hotelName: string
+  ownerName: string
 }) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `📢 New Publish Request: ${hotelName}`
+    sendSmtpEmail.subject = `📢 New Publish Request: ${hotelName}`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -260,8 +269,8 @@ export async function sendPublishRequestEmail({
             
             <div class="info-box">
               <h3>Hotel Details:</h3>
-              <p><strong>Hotel Name:</strong> ${hotelName}</p>
-              <p><strong>Manager:</strong> ${ownerName}</p>
+              <p><strong>Hotel Name:</strong> ${escapeHtml(hotelName)}</p>
+              <p><strong>Manager:</strong> ${escapeHtml(ownerName)}</p>
             </div>
             
             <p>Please review the hotel details and approve or reject the publish request.</p>
@@ -281,46 +290,46 @@ export async function sendPublishRequestEmail({
       </html>
     `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        console.log('✅ Publish request email sent successfully:', result.body?.messageId)
-        return { success: true, messageId: result.body?.messageId }
-    } catch (error: any) {
-        console.error('❌ Failed to send publish request email:', error)
-        console.error('Error details:', {
-            to,
-            hotelName,
-            ownerName,
-            errorMessage: error.message,
-            errorResponse: error.response?.body
-        })
-        return { success: false, message: error.message || 'Failed to send publish request email' }
-    }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    console.log('✅ Publish request email sent successfully:', result.body?.messageId)
+    return { success: true, messageId: result.body?.messageId }
+  } catch (error: any) {
+    console.error('❌ Failed to send publish request email:', error)
+    console.error('Error details:', {
+      to,
+      hotelName,
+      ownerName,
+      errorMessage: error.message,
+      errorResponse: error.response?.body
+    })
+    return { success: false, message: error.message || 'Failed to send publish request email' }
+  }
 }
 
 export async function sendPublishApprovalEmail({
-    to,
-    hotelName,
-    ownerName,
-    dashboardUrl
+  to,
+  hotelName,
+  ownerName,
+  dashboardUrl
 }: {
-    to: string
-    hotelName: string
-    ownerName: string
-    dashboardUrl: string
+  to: string
+  hotelName: string
+  ownerName: string
+  dashboardUrl: string
 }) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `🎉 Your Hotel "${hotelName}" is Now Live!`
+    sendSmtpEmail.subject = `🎉 Your Hotel "${hotelName}" is Now Live!`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -372,39 +381,39 @@ export async function sendPublishApprovalEmail({
       </html>
     `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        return { success: true, messageId: result.body?.messageId }
-    } catch {
-        return { success: false, message: 'Failed to send publish approval email' }
-    }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send publish approval email' }
+  }
 }
 
 export async function sendPublishRejectionEmail({
-    to,
-    hotelName,
-    ownerName,
-    reason,
-    dashboardUrl
+  to,
+  hotelName,
+  ownerName,
+  reason,
+  dashboardUrl
 }: {
-    to: string
-    hotelName: string
-    ownerName: string
-    reason: string
-    dashboardUrl: string
+  to: string
+  hotelName: string
+  ownerName: string
+  reason: string
+  dashboardUrl: string
 }) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `Publish Request Update: ${hotelName}`
+    sendSmtpEmail.subject = `Publish Request Update: ${hotelName}`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -455,39 +464,39 @@ export async function sendPublishRejectionEmail({
       </html>
     `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        return { success: true, messageId: result.body?.messageId }
-    } catch {
-        return { success: false, message: 'Failed to send publish rejection email' }
-    }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send publish rejection email' }
+  }
 }
 
 export async function sendPublishChangeRequestEmail({
-    to,
-    hotelName,
-    ownerName,
-    changeRequest,
-    dashboardUrl
+  to,
+  hotelName,
+  ownerName,
+  changeRequest,
+  dashboardUrl
 }: {
-    to: string
-    hotelName: string
-    ownerName: string
-    changeRequest: string
-    dashboardUrl: string
+  to: string
+  hotelName: string
+  ownerName: string
+  changeRequest: string
+  dashboardUrl: string
 }) {
-    try {
-        const sendSmtpEmail = new brevo.SendSmtpEmail()
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
 
-        sendSmtpEmail.sender = {
-            name: 'LankaStay',
-            email: 'siritharsanthosh@gmail.com'
-        }
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
 
-        sendSmtpEmail.to = [{ email: to, name: ownerName }]
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
 
-        sendSmtpEmail.subject = `Action Required: Update Request for ${hotelName}`
+    sendSmtpEmail.subject = `Action Required: Update Request for ${hotelName}`
 
-        sendSmtpEmail.htmlContent = `
+    sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -536,9 +545,9 @@ export async function sendPublishChangeRequestEmail({
       </html>
     `
 
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        return { success: true, messageId: result.body?.messageId }
-    } catch {
-        return { success: false, message: 'Failed to send change request email' }
-    }
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send change request email' }
+  }
 }
