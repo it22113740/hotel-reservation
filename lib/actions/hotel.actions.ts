@@ -497,7 +497,7 @@ export async function approvePublish(hotelId: string) {
     }
     
     // Wait for update to propagate
-    await new Promise(resolve => setTimeout(resolve, 200))
+    // await new Promise(resolve => setTimeout(resolve, 200))
     
     // Verify the update
     const verifyDoc = await collection.findOne({ _id: hotelObjectId })
