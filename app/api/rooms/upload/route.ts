@@ -73,8 +73,10 @@ export async function POST(request: NextRequest) {
                 }, (error, result) => {
                     if (error) {
                         reject(error)
+                    } else if (!result?.secure_url) {
+                        reject(new Error('Upload succeeded but no URL returned'))
                     } else {
-                        resolve({ secure_url: result?.secure_url || '' })
+                        resolve({ secure_url: result.secure_url })
                     }
                 }).end(buffer)
             })
