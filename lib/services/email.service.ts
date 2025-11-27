@@ -551,3 +551,246 @@ export async function sendPublishChangeRequestEmail({
     return { success: false, message: 'Failed to send change request email' }
   }
 }
+
+// ========== CHANGE REQUEST EMAILS ==========
+
+interface SendChangeRequestNotificationEmailParams {
+  to: string
+  hotelName: string
+  managerName: string
+  dashboardUrl: string
+}
+
+export async function sendChangeRequestNotificationEmail({
+  to,
+  hotelName,
+  managerName,
+  dashboardUrl
+}: SendChangeRequestNotificationEmailParams) {
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
+
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
+
+    sendSmtpEmail.to = [{ email: to }]
+
+    sendSmtpEmail.subject = `🔔 New Change Request from ${hotelName}`
+
+    sendSmtpEmail.htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .info-box { background: white; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; }
+          .button:hover { background: #764ba2; }
+          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 30px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔔 New Change Request</h1>
+            <p>Action Required</p>
+          </div>
+          
+          <div class="content">
+            <h2>Hello Admin,</h2>
+            
+            <p>A new change request has been submitted by <strong>${managerName}</strong> for the hotel <strong>"${hotelName}"</strong>.</p>
+            
+            <div class="info-box">
+              <p><strong>Please review the changes and approve or reject the request.</strong></p>
+            </div>
+            
+            <center>
+              <a href="${dashboardUrl}" class="button">Review Change Request →</a>
+            </center>
+            
+            <p>Best regards,<br>The LankaStay Team</p>
+            
+            <div class="footer">
+              <p>© 2024 LankaStay. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send change request notification email' }
+  }
+}
+
+interface SendChangeRequestApprovalEmailParams {
+  to: string
+  hotelName: string
+  ownerName: string
+  dashboardUrl: string
+}
+
+export async function sendChangeRequestApprovalEmail({
+  to,
+  hotelName,
+  ownerName,
+  dashboardUrl
+}: SendChangeRequestApprovalEmailParams) {
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
+
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
+
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
+
+    sendSmtpEmail.subject = `✅ Your Changes to "${hotelName}" Have Been Approved!`
+
+    sendSmtpEmail.htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .success-box { background: white; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; }
+          .button { display: inline-block; background: #4caf50; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; }
+          .button:hover { background: #45a049; }
+          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 30px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>✅ Changes Approved!</h1>
+            <p>Your Request Has Been Approved</p>
+          </div>
+          
+          <div class="content">
+            <h2>Hello ${ownerName},</h2>
+            
+            <p>Great news! Your change request for <strong>"${hotelName}"</strong> has been approved by the admin.</p>
+            
+            <div class="success-box">
+              <p><strong>All your changes have been applied successfully.</strong></p>
+            </div>
+            
+            <center>
+              <a href="${dashboardUrl}" class="button">View Hotel Dashboard →</a>
+            </center>
+            
+            <p>Best regards,<br>The LankaStay Team</p>
+            
+            <div class="footer">
+              <p>© 2024 LankaStay. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send approval email' }
+  }
+}
+
+interface SendChangeRequestRejectionEmailParams {
+  to: string
+  hotelName: string
+  ownerName: string
+  feedback: string
+  dashboardUrl: string
+}
+
+export async function sendChangeRequestRejectionEmail({
+  to,
+  hotelName,
+  ownerName,
+  feedback,
+  dashboardUrl
+}: SendChangeRequestRejectionEmailParams) {
+  try {
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
+
+    sendSmtpEmail.sender = {
+      name: 'LankaStay',
+      email: 'siritharsanthosh@gmail.com'
+    }
+
+    sendSmtpEmail.to = [{ email: to, name: ownerName }]
+
+    sendSmtpEmail.subject = `❌ Change Request for "${hotelName}" Requires Updates`
+
+    sendSmtpEmail.htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #ff9800; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .feedback-box { background: white; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; }
+          .button:hover { background: #764ba2; }
+          .footer { text-align: center; color: #777; font-size: 12px; margin-top: 30px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>❌ Changes Require Updates</h1>
+            <p>Admin Feedback</p>
+          </div>
+          
+          <div class="content">
+            <h2>Hello ${ownerName},</h2>
+            
+            <p>Your change request for <strong>"${hotelName}"</strong> has been reviewed, but requires some updates before it can be approved.</p>
+            
+            <div class="feedback-box">
+              <h3>Admin Feedback:</h3>
+              <p>${feedback}</p>
+            </div>
+            
+            <p>Please review the feedback above and make the necessary changes. You can submit a new change request after making the updates.</p>
+            
+            <center>
+              <a href="${dashboardUrl}" class="button">Update Hotel Details →</a>
+            </center>
+            
+            <p>If you have any questions, feel free to contact our support team.</p>
+            
+            <p>Best regards,<br>The LankaStay Team</p>
+            
+            <div class="footer">
+              <p>© 2024 LankaStay. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    return { success: true, messageId: result.body?.messageId }
+  } catch {
+    return { success: false, message: 'Failed to send rejection email' }
+  }
+}

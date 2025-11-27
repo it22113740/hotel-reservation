@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { IRoom } from '@/types/room.types'
+import PendingChangeRequest from './PendingChangeRequest'
 
 
 
@@ -326,6 +327,8 @@ export default function RoomsManager({ initialRooms }: RoomsManagerProps) {
 
   return (
     <div className="space-y-6">
+      <PendingChangeRequest />
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Manage Rooms</h1>

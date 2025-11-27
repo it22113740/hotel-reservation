@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { PublishStatus } from '@/types/hotel.types'
+import PendingChangeRequest from './PendingChangeRequest'
 
 interface ManagerHotelViewProps {
   hotel: {
@@ -105,6 +106,8 @@ export default function ManagerHotelView({ hotel }: ManagerHotelViewProps) {
 
   return (
     <div className="space-y-6">
+      <PendingChangeRequest />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

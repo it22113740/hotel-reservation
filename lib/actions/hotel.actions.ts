@@ -15,6 +15,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import Room from '@/databases/room.model'
 import User from '@/databases/user.model'
+import { addHotelChangesToRequest } from './change-request.actions'
 
 /**
  * Helper function to ensure hotel has publishStatus and isPublished fields
@@ -182,31 +183,19 @@ export async function updateHotelDetails(data: {
       throw new Error('Hotel not found')
     }
 
-    // Update fields
-    if (data.category !== undefined) hotel.category = data.category
-    if (data.coordinates) hotel.coordinates = data.coordinates
-    if (data.amenities) hotel.amenities = data.amenities
-    if (data.checkIn) hotel.checkIn = data.checkIn
-    if (data.checkOut) hotel.checkOut = data.checkOut
-    if (data.languages) hotel.languages = data.languages
-    if (data.policies) hotel.policies = data.policies
-    if (data.description) hotel.description = data.description
-    if (data.images) hotel.images = data.images
+    // Add to change request instead of updating directly
+    const result = await addHotelChangesToRequest(data)
 
-    // If hotel was published and manager is editing, reset publish status
-    if (hotel.isPublished && hotel.publishStatus === 'published') {
-      hotel.publishStatus = 'draft'
-      hotel.isPublished = false
+    if (!result.success) {
+      return result
     }
-
-    await hotel.save()
 
     revalidatePath('/dashboard/manager/hotels')
     revalidatePath('/dashboard/manager/hotels/edit')
 
     return {
       success: true,
-      message: 'Hotel details updated successfully'
+      message: 'Hotel update request submitted. Waiting for admin approval.'
     }
   } catch (error) {
     console.error('Error updating hotel:', error)
