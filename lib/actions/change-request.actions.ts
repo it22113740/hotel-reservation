@@ -161,7 +161,13 @@ export async function addHotelChangesToRequest(data: {
       }
       
       // Handle arrays (like amenities, languages, policies, images)
-      if (Array.isArray(newValue) && Array.isArray(currentValue)) {
+      if (Array.isArray(newValue)) {
+        // If current value is not an array or is null/undefined, treat as change
+        if (!Array.isArray(currentValue)) {
+          changesToMerge[key] = newValue
+          return
+        }
+        // Compare arrays
         const newSorted = JSON.stringify([...newValue].sort())
         const currentSorted = JSON.stringify([...currentValue].sort())
         if (newSorted !== currentSorted) {
@@ -185,10 +191,8 @@ export async function addHotelChangesToRequest(data: {
     }
     
     // Get existing hotelChanges as plain object to avoid Mongoose validation issues
-    const existingChanges = request.hotelChanges ? 
-      (typeof request.hotelChanges.toObject === 'function' 
-        ? request.hotelChanges.toObject() 
-        : JSON.parse(JSON.stringify(request.hotelChanges))) 
+    const existingChanges = request.hotelChanges 
+      ? JSON.parse(JSON.stringify(request.hotelChanges))
       : {}
     
     // Merge changes into plain object
@@ -312,7 +316,13 @@ export async function addRoomChangesToRequest(
           }
           
           // Handle arrays (like images, amenities)
-          if (Array.isArray(newValue) && Array.isArray(currentValue)) {
+          if (Array.isArray(newValue)) {
+            // If current value is not an array or is null/undefined, treat as change
+            if (!Array.isArray(currentValue)) {
+              filteredRoomData[key] = newValue
+              return
+            }
+            // Compare arrays
             const newSorted = JSON.stringify([...newValue].sort())
             const currentSorted = JSON.stringify([...currentValue].sort())
             if (newSorted !== currentSorted) {
