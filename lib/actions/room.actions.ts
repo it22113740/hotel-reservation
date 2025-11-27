@@ -5,6 +5,7 @@ import Hotel from '@/databases/hotel.model'
 import { auth } from '@clerk/nextjs/server'
 import dbConnect from '../db'
 import { revalidatePath } from 'next/cache'
+import { addRoomChangesToRequest } from './change-request.actions'
 
 /**
  * Get all rooms for a hotel by hotelId (for admin)
@@ -100,9 +101,8 @@ export async function createRoom(data: {
       throw new Error('Missing required fields')
     }
 
-    // Create room
-    const room = await Room.create({
-      hotelId: hotel._id,
+    // Add to change request instead of creating directly
+    const result = await addRoomChangesToRequest('create', null, {
       name: data.name,
       description: data.description,
       image: data.image,
@@ -120,11 +120,8 @@ export async function createRoom(data: {
       maxNights: data.maxNights,
     })
 
-    // Update hotel's base price if this is the first room or cheapest room
-    const allRooms = await Room.find({ hotelId: hotel._id }).sort({ price: 1 })
-    if (allRooms.length > 0) {
-      hotel.price = allRooms[0].price
-      await hotel.save()
+    if (!result.success) {
+      return result
     }
 
     revalidatePath('/dashboard/manager/hotels/rooms')
@@ -132,8 +129,7 @@ export async function createRoom(data: {
 
     return {
       success: true,
-      message: 'Room created successfully',
-      room: JSON.parse(JSON.stringify(room))
+      message: 'Room creation request submitted. Waiting for admin approval.',
     }
   } catch (error: any) {
     console.error('Error creating room:', error)
@@ -184,35 +180,19 @@ export async function updateRoom(roomId: string, data: {
       throw new Error('Room not found')
     }
 
-    // Update room fields
-    Object.keys(data).forEach(key => {
-      if (data[key as keyof typeof data] !== undefined) {
-        (room as any)[key] = data[key as keyof typeof data]
-      }
-    })
+    // Add to change request instead of updating directly
+    const result = await addRoomChangesToRequest('update', roomId, data)
 
-    await room.save()
-
-    // Update hotel's base price if needed
-    const allRooms = await Room.find({ hotelId: hotel._id }).sort({ price: 1 })
-    if (allRooms.length > 0) {
-      hotel.price = allRooms[0].price
-      await hotel.save()
+    if (!result.success) {
+      return result
     }
-
-    // If hotel was published and manager is editing, reset publish status
-    if (hotel.isPublished && hotel.publishStatus === 'published') {
-      hotel.publishStatus = 'draft'
-      hotel.isPublished = false
-    }
-    await hotel.save()
 
     revalidatePath('/dashboard/manager/hotels/rooms')
     revalidatePath('/dashboard/manager/hotels')
 
     return {
       success: true,
-      message: 'Room updated successfully'
+      message: 'Room update request submitted. Waiting for admin approval.'
     }
   } catch (error: any) {
     console.error('Error updating room:', error)
@@ -247,23 +227,19 @@ export async function deleteRoom(roomId: string) {
       throw new Error('Room not found')
     }
 
-    await Room.deleteOne({ _id: roomId })
+    // Add to change request instead of deleting directly
+    const result = await addRoomChangesToRequest('delete', roomId, null)
 
-    // Update hotel's base price
-    const allRooms = await Room.find({ hotelId: hotel._id }).sort({ price: 1 })
-    if (allRooms.length > 0) {
-      hotel.price = allRooms[0].price
-    } else {
-      hotel.price = 0
+    if (!result.success) {
+      return result
     }
-    await hotel.save()
 
     revalidatePath('/dashboard/manager/hotels/rooms')
     revalidatePath('/dashboard/manager/hotels')
 
     return {
       success: true,
-      message: 'Room deleted successfully'
+      message: 'Room deletion request submitted. Waiting for admin approval.'
     }
   } catch (error: any) {
     console.error('Error deleting room:', error)

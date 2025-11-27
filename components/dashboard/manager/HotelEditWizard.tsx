@@ -9,6 +9,7 @@ import { updateHotelDetails } from '@/lib/actions/hotel.actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import PendingChangeRequest from './PendingChangeRequest'
 
 interface HotelEditWizardProps {
   hotel: any
@@ -130,6 +131,8 @@ export default function HotelEditWizard({ hotel }: HotelEditWizardProps) {
 
   return (
     <div className="space-y-6">
+      <PendingChangeRequest />
+      
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Edit Hotel Details</h1>

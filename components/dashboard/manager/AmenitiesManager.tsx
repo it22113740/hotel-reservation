@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { updateHotelDetails } from '@/lib/actions/hotel.actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import PendingChangeRequest from './PendingChangeRequest'
 
 const AVAILABLE_AMENITIES = [
   { id: 'wifi', label: 'WiFi', icon: '📶' },
@@ -71,6 +72,8 @@ export default function AmenitiesManager({ currentAmenities }: AmenitiesManagerP
 
   return (
     <div className="space-y-6">
+      <PendingChangeRequest />
+      
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Manage Amenities</h1>
         <p className="text-gray-600 mt-1">Select amenities available at your hotel</p>

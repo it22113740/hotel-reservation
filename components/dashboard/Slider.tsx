@@ -14,7 +14,8 @@ import {
   Hotel,
   ChevronDown,
   ChevronRight,
-  Database
+  Database,
+  Clock
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -46,6 +47,7 @@ export default function DashboardSidebar({ userRole }: SidebarProps) {
         { href: '/dashboard/admin/hotels/registrations', icon: Building2, label: 'Registrations', submenu: false },
       ]
     },
+    { href: '/dashboard/admin/change-requests', icon: Clock, label: 'Change Requests', submenu: false },
     { href: '/dashboard/admin/users', icon: Users, label: 'Users', submenu: false },
     { href: '/dashboard/admin/bookings', icon: Calendar, label: 'Bookings', submenu: false },
     { href: '/dashboard/admin/analytics', icon: BarChart3, label: 'Analytics', submenu: false },
