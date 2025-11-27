@@ -3,8 +3,8 @@
 /**
  * Room Interface (for UI/API)
  */
-export interface Room {
-    id: string
+export interface IRoom {
+    _id: string
     hotelId: string
     name: string
     description?: string
